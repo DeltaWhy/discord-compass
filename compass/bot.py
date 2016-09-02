@@ -30,7 +30,9 @@ async def on_message(message):
     if message.content.startswith('!'):
         args = message.content.split()
         cmd = args[0][1:].lower()
-        await bot.send_message(message.channel, _invoke(cmd, *args[1:], message=message))
+        resp = _invoke(cmd, *args[1:], message=message)
+        if resp:
+            await bot.send_message(message.channel, resp)
 
 def run(token):
     return bot.run(token)
@@ -106,7 +108,7 @@ def _invoke(k, *args, **kwargs):
     except TypeError as e:
         traceback.print_exc()
         return "Bad arguments for " + k + "\nUsage: " + _usage(k)
-    except e:
+    except:
         traceback.print_exc()
         return "Something went wrong."
 
