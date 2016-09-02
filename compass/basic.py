@@ -34,8 +34,6 @@ def disapprove(*args, message):
 def shrug():
     """
     IDK.
-
-    shrug
     """
     return "¯\\_(ツ)_/¯"
 
