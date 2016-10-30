@@ -5,7 +5,7 @@ import functools
 import inspect
 import traceback
 
-__all__ = ['bot', 'run', 'command']
+__all__ = ['bot', 'run', 'command', 'hook']
 
 bot = discord.Client()
 
@@ -27,10 +27,17 @@ async def on_message(message):
     if ignore_bots and message.author.bot:
         return
 
+    for hook in _hooks:
+        res = hook(message)
+        if res:
+            return
+
     if message.content.startswith('!'):
         args = message.content.split()
         cmd = args[0][1:].lower()
         resp = _invoke(cmd, *args[1:], message=message)
+        if asyncio.iscoroutine(resp):
+            resp = await resp
         if resp:
             await bot.send_message(message.channel, resp)
 
@@ -39,6 +46,7 @@ def run(token):
 
 _commands = {}
 _aliases = {}
+_hooks = []
 def command(name, *aliases):
     def command_inner(f):
         if name in _commands:
@@ -50,6 +58,10 @@ def command(name, *aliases):
             _aliases[n] = f
         return f
     return command_inner
+
+def hook(f):
+    _hooks.append(f)
+    return f
 
 def _shorthelp(k):
     if k in _commands:

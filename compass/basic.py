@@ -1,3 +1,4 @@
+import compass.bot
 from compass.bot import command
 import random
 import re
@@ -89,3 +90,12 @@ def choose(*args):
 
     a, _, b = m.partition(' or ')
     return random.choice([a, b.rstrip('?')])
+
+@command('topic')
+async def topic(*args, message):
+    """
+    Set the channel topic.
+
+    topic <topic>
+    """
+    await compass.bot.bot.edit_channel(message.channel, topic=message.content.replace("!topic ", "", 1))
