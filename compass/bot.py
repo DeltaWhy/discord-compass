@@ -29,6 +29,8 @@ async def on_message(message):
 
     for hook in _hooks:
         res = hook(message)
+        if asyncio.iscoroutine(res):
+            res = await res
         if res:
             return
 
@@ -95,7 +97,10 @@ def _usage(k):
     u = k
     for pn in p:
         if p[pn].kind == inspect.Parameter.POSITIONAL_ONLY or p[pn].kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            u += " " + pn
+            if p[pn].default == p[pn].empty:
+                u += " <" + pn + ">"
+            else:
+                u += " [" + pn + "]"
         elif p[pn].kind == inspect.Parameter.VAR_POSITIONAL:
             u += " ..."
         else:
