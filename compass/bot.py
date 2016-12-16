@@ -19,6 +19,7 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     ignored_users.append(bot.user.id)
+    await bot.change_presence(game=discord.Game(name='Kill all humans'))
 
 @bot.event
 async def on_message(message):
