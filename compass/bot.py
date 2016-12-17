@@ -5,7 +5,7 @@ import functools
 import inspect
 import traceback
 
-__all__ = ['bot', 'run', 'command', 'hook']
+__all__ = ['bot', 'run', 'command', 'hook', 'initialize']
 
 bot = discord.Client()
 
@@ -19,6 +19,10 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     ignored_users.append(bot.user.id)
+    for x in _init_hooks:
+        res = x()
+        if asyncio.iscoroutine(res):
+            res = await res
     await bot.change_presence(game=discord.Game(name='Kill all humans'))
 
 @bot.event
@@ -50,6 +54,7 @@ def run(token):
 _commands = {}
 _aliases = {}
 _hooks = []
+_init_hooks = []
 def command(name, *aliases):
     def command_inner(f):
         if name in _commands:
@@ -64,6 +69,10 @@ def command(name, *aliases):
 
 def hook(f):
     _hooks.append(f)
+    return f
+
+def initialize(f):
+    _init_hooks.append(f)
     return f
 
 def _shorthelp(k):
@@ -156,3 +165,8 @@ def help(*args, message):
         return _shorthelp(cmd) + "\n\n" + _usage(cmd)
     else:
         return "Bad arguments for !help."
+
+@command('test')
+async def test_command(*args, message):
+    await bot.change_presence(game=discord.Game(name=message.content))
+    return None

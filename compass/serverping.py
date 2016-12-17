@@ -2,7 +2,8 @@ import asyncio
 import struct
 import json
 import compass.bot
-from compass.bot import command
+import os
+from compass.bot import bot, command, initialize
 
 def read_varint(data):
     i = 0
@@ -68,3 +69,36 @@ async def status(address, port=25565):
     if 'sample' not in resp['players']:
         return '{} players online.', resp['players']['online']
     return 'Online: ' + ', '.join([p['name'] for p in resp['players']['sample']])
+
+@initialize
+async def init_test():
+    if 'AUTOSTATUS' in os.environ:
+        for spec in os.environ['AUTOSTATUS'].split(';'):
+            chan_id, _, srv = spec.partition('=')
+            chan = bot.get_channel(chan_id)
+            asyncio.get_event_loop().create_task(
+                    autostatus(chan, srv))
+
+async def autostatus(chan, srv, interval=300):
+    servers = []
+    for x in srv.split(','):
+        name, _, y = x.partition('/')
+        addr, _, port = y.partition(':')
+        port = int(port)
+        servers.append((name, addr, port))
+
+    while True:
+        messages = []
+        for (name, addr, port) in servers:
+            resp = await run(addr, port)
+            if not(resp) or 'players' not in resp:
+                messages.append(name + ': Error')
+            elif 'online' not in resp['players'] or not resp['players']['online']:
+                messages.append(name + ': No players')
+            elif 'sample' not in resp['players']:
+                messages.append(name + ': {} players'.format(resp['players']['online']))
+            else:
+                players = [p['name'] for p in resp['players']['sample']]
+                messages.append(name + ': ' + ', '.join(players))
+        await bot.edit_channel(chan, topic=', '.join(messages))
+        await asyncio.sleep(interval)
