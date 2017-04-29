@@ -165,8 +165,3 @@ def help(*args, message):
         return _shorthelp(cmd) + "\n\n" + _usage(cmd)
     else:
         return "Bad arguments for !help."
-
-@command('test')
-async def test_command(*args, message):
-    await bot.change_presence(game=discord.Game(name=message.content))
-    return None
