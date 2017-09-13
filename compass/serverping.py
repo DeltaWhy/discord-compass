@@ -14,7 +14,7 @@ def read_varint(data):
         i |= (k & 0x7f) << j * 7
         j += 1
         if j > 5:
-            raise 'VarInt too big'
+            raise TypeError('VarInt too big')
         if (k & 0x80) != 0x80:
             break
     return (i, data)
@@ -38,7 +38,7 @@ class ServerPingProtocol(asyncio.Protocol):
             self.resp_len, data = read_varint(data)
         if not self.resp:
             if data[0] != 0:
-                raise 'Bad packet'
+                raise ValueError('Bad packet')
             self.resp = data[1:]
         else:
             self.resp += data

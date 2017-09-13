@@ -3,3 +3,4 @@ import compass.basic
 import compass.search
 import compass.serverping
 import compass.parrot
+import compass.rcon
