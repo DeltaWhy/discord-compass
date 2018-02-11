@@ -100,5 +100,5 @@ async def autostatus(chan, srv, interval=300):
             else:
                 players = [p['name'] for p in resp['players']['sample']]
                 messages.append(name + ': ' + ', '.join(players))
-        await bot.edit_channel(chan, topic=', '.join(messages))
+        await bot.edit_channel(chan, topic=' || '.join(messages))
         await asyncio.sleep(interval)
