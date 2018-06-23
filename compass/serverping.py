@@ -54,7 +54,7 @@ async def run(address, port):
     loop = asyncio.get_event_loop()
     future = loop.create_future()
     await loop.create_connection(lambda: ServerPingProtocol(address, port, future), address, port)
-    return await future
+    return await asyncio.wait_for(future, 10.0)
 
 @command('status', 'mcstatus')
 async def status(address, port=25565):
@@ -90,7 +90,10 @@ async def autostatus(chan, srv, interval=300):
     while True:
         messages = []
         for (name, addr, port) in servers:
-            resp = await run(addr, port)
+            try:
+                resp = await run(addr, port)
+            except Exception:
+                resp = None
             if not(resp) or 'players' not in resp:
                 messages.append(name + ': Error')
             elif 'online' not in resp['players'] or not resp['players']['online']:
